@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"wtsp-backend/server/api"
-	"wtsp-backend/server/api/user"
 	"wtsp-backend/server/config"
 
 	"github.com/gin-gonic/gin"
@@ -12,16 +11,10 @@ import (
 )
 
 func main() {
-	// Load environment variables (optional)
-	///config.LoadEnv(".env")
-	// Load .env file
+	// Load environment variables
 	_ = godotenv.Load("server/config/.env")
-
 	// Connect to DB
 	config.ConnectDB()
-
-	// Initialize collections
-	user.InitUserCollection()
 
 	// Start Gin server
 	r := gin.Default()

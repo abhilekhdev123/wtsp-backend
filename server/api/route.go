@@ -10,12 +10,14 @@ import (
 
 // all routes for the API
 func Routes(r *gin.Engine) {
+	// Initialize collections
+	user.InitUserCollection()
 
 	// API versioning
 	api := r.Group("/api/v1")
 
 	// User routes
-	userRoutes := api.Group("/user")
+	userRoutes := api
 	user.RegisterUserRoutes(userRoutes)
 
 	// Root route

@@ -3,5 +3,7 @@ package user
 import "github.com/gin-gonic/gin"
 
 func RegisterUserRoutes(rg *gin.RouterGroup) {
-	rg.POST("/sign-up", CreateUserHandler)
+	userroute := "users"
+	rg.POST(userroute+"/sign-up", CreateUserHandler)
+	rg.GET(userroute+"/", GetUserHandler)
 }

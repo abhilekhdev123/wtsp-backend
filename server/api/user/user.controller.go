@@ -1,25 +1,42 @@
 package user
 
 import (
-	"log"
 	"net/http"
+	"wtsp-backend/server/config"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CreateUserHandler(c *gin.Context) {
-	log.Println("CreateUserHandler called")
-	var input User
-
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var user User
+	if err := c.BindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	if err := CreateUserService(input); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+	createdUser, err := CreateUserService(user)
+
+	if err != nil {
+		//c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		config.SendError(c, http.StatusInternalServerError, "Failed to create user")
+		return
+	}
+	// ... rest of the code
+	config.SendSuccess(c, http.StatusOK, createdUser, "User created successfully")
+}
+
+func GetUserHandler(c *gin.Context) {
+
+	user, err := GetUserService()
+	if err != nil {
+		config.SendError(c, http.StatusInternalServerError, "Failed to retrieve user")
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "User created successfully"})
+	if user == nil {
+		config.SendError(c, http.StatusFound, "User not found")
+		return
+	}
+
+	config.SendSuccess(c, http.StatusOK, user, "User retrieved successfully")
 }
