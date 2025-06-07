@@ -7,12 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CreateUserHandler(c *gin.Context) {
+func CreateUserHandler1(c *gin.Context) {
 	var user User
-	if err := c.BindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
-		return
-	}
+	// //fmt.Println("CreateUserHandler called", user)
+	// if err := c.BindJSON(&user); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input", "details": err})
+	// 	return
+	// }
 
 	createdUser, err := CreateUserService(user)
 
@@ -22,6 +23,18 @@ func CreateUserHandler(c *gin.Context) {
 		return
 	}
 	// ... rest of the code
+	config.SendSuccess(c, http.StatusOK, createdUser, "User created successfully")
+}
+
+func CreateUserHandler(c *gin.Context) {
+	var user User
+
+	createdUser, err := CreateUserService(user)
+
+	if err != nil {
+		config.SendError(c, http.StatusInternalServerError, "Failed to create user")
+		return
+	}
 	config.SendSuccess(c, http.StatusOK, createdUser, "User created successfully")
 }
 

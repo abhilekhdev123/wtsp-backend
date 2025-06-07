@@ -1,13 +1,5 @@
 package user
 
-import (
-	"net/http"
-	"regexp"
-
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
-)
-
 // CreateUserRequest defines the expected fields for user sign-up.
 type CreateUserRequest struct {
 	Email          string   `json:"email" binding:"required,email"`
@@ -22,30 +14,30 @@ type CreateUserRequest struct {
 	IsGoogleLogin  *bool    `json:"isGoogleLogin,omitempty"`
 }
 
-// Custom validation for phone (optional, example)
-var phoneRegex = regexp.MustCompile(`^\+?[0-9]{7,15}$`)
+// // Custom validation for phone (optional, example)
+// var phoneRegex = regexp.MustCompile(`^\+?[0-9]{7,15}$`)
 
-func UserValidationMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var req CreateUserRequest
-		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			c.Abort()
-			return
-		}
-		validate := validator.New()
-		// Optional: custom validation for phone
-		if req.Phone != "" && !phoneRegex.MatchString(req.Phone) {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone format"})
-			c.Abort()
-			return
-		}
-		if err := validate.Struct(req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			c.Abort()
-			return
-		}
-		c.Set("validatedBody", req)
-		c.Next()
-	}
-}
+// func UserValidation() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		var req CreateUserRequest
+// 		if err := c.ShouldBindJSON(&req); err != nil {
+// 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 			c.Abort()
+// 			return
+// 		}
+// 		validate := validator.New()
+// 		// Optional: custom validation for phone
+// 		if req.Phone != "" && !phoneRegex.MatchString(req.Phone) {
+// 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid phone format"})
+// 			c.Abort()
+// 			return
+// 		}
+// 		if err := validate.Struct(req); err != nil {
+// 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 			c.Abort()
+// 			return
+// 		}
+// 		c.Set("validatedBody", req)
+// 		c.Next()
+// 	}
+// }
