@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-
+	"os"
 	"wtsp-backend/server/api"
 	"wtsp-backend/server/config"
 
@@ -23,6 +23,10 @@ func main() {
 	api.Routes(r)
 
 	// Start server
-	log.Println("Server started on port 8080")
-	r.Run(":8080")
+	log.Println(`Server started on port`, os.Getenv("PORT"))
+	if err := r.Run(":" + os.Getenv("PORT")); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+
+	r.Run(":" + os.Getenv("PORT")) // Start the server on the specified port
 }

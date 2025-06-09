@@ -2,40 +2,50 @@ package user
 
 import (
 	"net/http"
+	"time"
 	"wtsp-backend/server/config"
 
 	"github.com/gin-gonic/gin"
 )
 
-func CreateUserHandler1(c *gin.Context) {
-	var user User
-	// //fmt.Println("CreateUserHandler called", user)
-	// if err := c.BindJSON(&user); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input", "details": err})
-	// 	return
-	// }
+func CreateUserHandler(c *gin.Context) {
+	// Safe assert - already validated by middleware
+	req := c.MustGet("validatedBody").(*CreateUserRequest)
+
+	user := User{
+		Email:              req.Email,
+		Name:               req.Name,
+		Phone:              req.Phone,
+		Role:               req.Role,
+		ProfilePic:         req.ProfilePic,
+		TargetPlatform:     req.TargetPlatform,
+		DeviceToken:        req.DeviceToken,
+		IsGoogleLogin:      getBool(req.IsGoogleLogin),
+		IsEmailVerified:    false,
+		IsMobileVerified:   false,
+		IsActive:           true,
+		NotificationStatus: true,
+		CreatedAt:          time.Now(),
+		UpdatedAt:          time.Now(),
+	}
+
+	// You can hash password here if needed:
+	// user.HashedPassword = hashPassword(req.Password)
 
 	createdUser, err := CreateUserService(user)
-
 	if err != nil {
-		//c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		config.SendError(c, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
-	// ... rest of the code
+
 	config.SendSuccess(c, http.StatusOK, createdUser, "User created successfully")
 }
 
-func CreateUserHandler(c *gin.Context) {
-	var user User
-
-	createdUser, err := CreateUserService(user)
-
-	if err != nil {
-		config.SendError(c, http.StatusInternalServerError, "Failed to create user")
-		return
+func getBool(b *bool) bool {
+	if b == nil {
+		return false
 	}
-	config.SendSuccess(c, http.StatusOK, createdUser, "User created successfully")
+	return *b
 }
 
 func GetUserHandler(c *gin.Context) {

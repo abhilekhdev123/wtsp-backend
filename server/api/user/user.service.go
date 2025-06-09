@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"time"
-	"wtsp-backend/server/config"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,29 +10,6 @@ import (
 )
 
 var userCollection *mongo.Collection
-
-func InitUserCollection() {
-	userCollection = config.MongoDB.Collection("users")
-}
-
-func CreateUserService1(u User) (*User, error) {
-	u.CreatedAt = time.Now()
-	u.UpdatedAt = time.Now()
-
-	result, err := userCollection.InsertOne(context.TODO(), u)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch the inserted document using the inserted ID
-	var createdUser User
-	err = userCollection.FindOne(context.TODO(), bson.M{"_id": result.InsertedID}).Decode(&createdUser)
-	if err != nil {
-		return nil, err
-	}
-
-	return &createdUser, nil
-}
 
 func CreateUserService(u User) (*User, error) {
 	u.ID = primitive.NewObjectID() // manually set the _id
@@ -73,4 +49,23 @@ func GetUserService() ([]User, error) {
 	}
 
 	return users, nil
+}
+
+func CreateUserService1(u User) (*User, error) {
+	u.CreatedAt = time.Now()
+	u.UpdatedAt = time.Now()
+
+	result, err := userCollection.InsertOne(context.TODO(), u)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the inserted document using the inserted ID
+	var createdUser User
+	err = userCollection.FindOne(context.TODO(), bson.M{"_id": result.InsertedID}).Decode(&createdUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return &createdUser, nil
 }
