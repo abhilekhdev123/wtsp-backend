@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"wtsp-backend/server/api/servey"
 	"wtsp-backend/server/api/user"
 
 	"github.com/gin-gonic/gin"
@@ -12,6 +13,7 @@ import (
 func Routes(r *gin.Engine) {
 	// Initialize collections
 	user.Init()
+	servey.Init()
 
 	// API versioning
 	api := r.Group("/api/v1")
@@ -19,6 +21,7 @@ func Routes(r *gin.Engine) {
 	// User routes
 	userRoutes := api
 	user.RegisterUserRoutes(userRoutes)
+	servey.ServeyRoute(userRoutes)
 
 	// Root route
 	api.GET("/", func(c *gin.Context) {

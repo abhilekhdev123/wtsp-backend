@@ -2,7 +2,10 @@ package user
 
 import (
 	"context"
+	"net/http"
 	"time"
+
+	"wtsp-backend/server/utility"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -11,18 +14,53 @@ import (
 
 var userCollection *mongo.Collection
 
-func CreateUserService(u User) (*User, error) {
-	u.ID = primitive.NewObjectID() // manually set the _id
-	u.CreatedAt = time.Now()
-	u.UpdatedAt = time.Now()
-
-	_, err := userCollection.InsertOne(context.TODO(), u)
-	if err != nil {
-		return nil, err
+func CreateUserService(req *CreateUserRequest) (*User, int, string, error) {
+	filter := bson.M{
+		"$or": []bson.M{
+			{"email": req.Email},
+			{"phone": req.Phone},
+		},
 	}
 
-	// No need to fetch again – we already have all the data
-	return &u, nil
+	var existing User
+	err := userCollection.FindOne(context.TODO(), filter).Decode(&existing)
+	if err == nil {
+		return nil, http.StatusConflict, "User with this email or phone already exists", nil
+	}
+
+	user := User{
+		ID:                 primitive.NewObjectID(),
+		Email:              req.Email,
+		Name:               req.Name,
+		Phone:              req.Phone,
+		Role:               req.Role,
+		ProfilePic:         req.ProfilePic,
+		TargetPlatform:     req.TargetPlatform,
+		DeviceToken:        req.DeviceToken,
+		IsGoogleLogin:      getBool(req.IsGoogleLogin),
+		IsEmailVerified:    false,
+		IsMobileVerified:   false,
+		IsActive:           true,
+		NotificationStatus: true,
+		CreatedAt:          time.Now(),
+		UpdatedAt:          time.Now(),
+	}
+
+	userSalt := utility.GenerateSalt() // generate a random salt
+	user.HashSalt = userSalt
+	// Hash the password if provided
+	password := req.Password
+	if password == "" {
+		password = "123456"
+	}
+	user.HashedPassword = utility.HashPassword(password, userSalt)
+
+	_, err = userCollection.InsertOne(context.TODO(), user)
+	if err != nil {
+		return nil, http.StatusInternalServerError, "Failed to create user", err
+	}
+
+	return &user, http.StatusOK, "User created successfully", nil
 }
 
 func GetUserService() ([]User, error) {
@@ -49,23 +87,4 @@ func GetUserService() ([]User, error) {
 	}
 
 	return users, nil
-}
-
-func CreateUserService1(u User) (*User, error) {
-	u.CreatedAt = time.Now()
-	u.UpdatedAt = time.Now()
-
-	result, err := userCollection.InsertOne(context.TODO(), u)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fetch the inserted document using the inserted ID
-	var createdUser User
-	err = userCollection.FindOne(context.TODO(), bson.M{"_id": result.InsertedID}).Decode(&createdUser)
-	if err != nil {
-		return nil, err
-	}
-
-	return &createdUser, nil
 }
