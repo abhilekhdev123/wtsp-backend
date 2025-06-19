@@ -8,9 +8,15 @@ import (
 )
 
 func CreateUserHandler(c *gin.Context) {
-	req := c.MustGet("validatedBody").(*CreateUserRequest)
+	//req := c.MustGet("validatedBody").(*CreateUserRequest)
 
-	createdUser, status, msg, err := CreateUserService(req)
+	var req CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		config.SendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	createdUser, status, msg, err := CreateUserService(&req)
 	if err != nil || status != http.StatusOK {
 		config.SendError(c, status, msg)
 		return

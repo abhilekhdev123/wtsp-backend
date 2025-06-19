@@ -2,9 +2,11 @@ package user
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
+	"wtsp-backend/server/api/auth"
 	"wtsp-backend/server/utility"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -59,6 +61,15 @@ func CreateUserService(req *CreateUserRequest) (*User, int, string, error) {
 	if err != nil {
 		return nil, http.StatusInternalServerError, "Failed to create user", err
 	}
+
+	// token, refreshtoken, err := auth.GenerateJWT(&user)
+	token, refreshtoken, err := auth.GenerateJWT(user.ID.Hex(), user.Role)
+
+	if err != nil {
+		return nil, http.StatusInternalServerError, "Failed to generate JWT", err
+	}
+
+	fmt.Println("token", token, "refreshtoken", refreshtoken)
 
 	return &user, http.StatusOK, "User created successfully", nil
 }
