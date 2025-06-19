@@ -1,0 +1,4 @@
+# wtsp-backend/server/api/auth
+server\api\auth\auth.service.go:35:16: syntax error: unexpected newline in composite literal; possibly missing comma or }
+server\api\auth\auth.service.go:36:22: syntax error: unexpected ) at end of statement
+server\api\auth\auth.service.go:40:2: syntax error: non-declaration statement outside function body
